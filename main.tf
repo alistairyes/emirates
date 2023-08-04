@@ -18,8 +18,13 @@ resource "aws_subnet" "example" {
 
 module "eks" {
   source = "./modules/eks"
-  // pass in necessary variables here
+
+  cluster_name = "my-eks-cluster"
+  vpc_id       = module.vpc.vpc_id
+  subnets      = module.vpc.subnet_ids
+  key_name     = "my-key-pair"
 }
+
 
 module "s3" {
   source = "./modules/s3"
