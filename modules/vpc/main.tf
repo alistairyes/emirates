@@ -1,24 +1,18 @@
-resource "aws_iam_role" "pipeline_role" {
-  name = var.pipeline_role_name
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "3.2.0"
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "codepipeline.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
+  name                 = var.vpc_name
+  cidr                 = var.vpc_cidr
+  azs                  = var.azs
+  private_subnets      = var.private_subnets
+  public_subnets       = var.public_subnets
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  enable_dns_hostnames = true
 
-resource "aws_iam_role_policy_attachment" "pipeline_role_policy_attachment" {
-  role       = aws_iam_role.pipeline_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+  tags = {
+    "Name" = var.vpc_name
+    "Environment" = var.environment
+  }
 }
