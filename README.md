@@ -1,4 +1,4 @@
-# NorthStar Airlines Booking System Infrastructure
+# NorthStar Airliness Flight Booking System Infrastructure
 
 This repository contains the Infrastructure as Code (IaC) setup for the NorthStar Airliness Flight Booking System. The infrastructure is built using Terraform, which allows for reliable and repeatable infrastructure deployments.
 
@@ -13,6 +13,10 @@ The target state architecture is designed to provide a stable, scalable, and hig
 - An AWS KMS key for encrypting the S3 buckets.
 - AWS Direct Connect for secure and reliable network connection to an on-premise data center for fetching flight pricing data.
 - AWS Local Zones for bringing application data closer to the end-users for low latency.
+
+### AWS Local Zones
+
+AWS Local Zones are a type of AWS infrastructure deployment that places AWS compute, storage, database, and other select services closer to large population, industry, and IT centers. They support the same AWS services, APIs, and toolsets. AWS Local Zones are perfect for latency-sensitive applications, and in our case, it helps to bring the flight booking data closer to the users, providing them with a better user experience.
 
 ## Automation Opportunities and Migration Approaches
 
@@ -29,6 +33,16 @@ The tools used in this setup include:
 - **AWS KMS**: For encryption of S3 buckets.
 - **AWS Direct Connect**: For network connection to on-premise data center.
 - **AWS Local Zones**: For low latency data access.
+
+## Single Source of Truth and Multiple Pipelines
+
+GitHub is used as the single source of truth for both the application code and the infrastructure code. This ensures that all changes are tracked and can be audited.
+
+There are two separate pipelines:
+
+1. **Infrastructure Pipeline**: This pipeline is triggered whenever changes are pushed to the infrastructure code in GitHub. It uses Terraform to apply the changes to the AWS environment.
+
+2. **Application Pipeline**: This pipeline is triggered whenever changes are pushed to the application code in GitHub. It builds a Docker image of the application, pushes it to a Docker registry, and then deploys the application to the EKS cluster.
 
 ## Demo
 
