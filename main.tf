@@ -16,30 +16,27 @@ resource "aws_dx_connection" "example" {
 }
 
 resource "aws_subnet" "example" {
-  vpc_id     = aws_vpc.example.id
+  vpc_id     = module.vpc.vpc_id
   cidr_block = "10.0.1.0/24"
   availability_zone = "us-west-2-lax-1a"
 }
-
 
 module "eks" {
   source = "./modules/eks"
 
   cluster_name = "my-eks-cluster"
   vpc_id       = module.vpc.vpc_id
-  subnets      = module.vpc.subnet_ids
+  subnets      = module.vpc.private_subnets
   key_name     = "my-key-pair"
 }
-
 
 module "s3" {
   source = "./modules/s3"
 
   artifact_store_bucket_name = "my-artifact-store-bucket"
   source_bucket_name         = "my-source-bucket"
-  kms_key_id                 = module.kms.kms_key_arn
+  kms_key_id                 = module.kms.key_arn
 }
-
 
 module "kms" {
   source = "terraform-aws-modules/kms/aws"
@@ -59,7 +56,6 @@ module "kms" {
     Environment = "dev"
   }
 }
-
 
 module "codepipeline" {
   source = "./modules/codepipeline"
