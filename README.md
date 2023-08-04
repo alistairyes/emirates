@@ -1,10 +1,10 @@
-# Emirates Flight Booking System Infrastructure
+# NorthStar Airlines Booking System Infrastructure
 
-This repository contains the Infrastructure as Code (IaC) setup for the Emirates Flight Booking System. The infrastructure is built using Terraform, which allows for reliable and repeatable infrastructure deployments.
+This repository contains the Infrastructure as Code (IaC) setup for the NorthStar Airliness Flight Booking System. The infrastructure is built using Terraform, which allows for reliable and repeatable infrastructure deployments.
 
 ## Target State Architecture
 
-The target state architecture is designed to provide a stable, scalable, and highly available environment for the Emirates Flight Booking System. The architecture includes:
+The target state architecture is designed to provide a stable, scalable, and highly available environment for the NorthStar Airliness Flight Booking System. The architecture includes:
 
 - A Virtual Private Cloud (VPC) with private and public subnets spread across multiple Availability Zones (AZs) for high availability.
 - An Amazon EKS cluster for running the application in a Kubernetes environment.
