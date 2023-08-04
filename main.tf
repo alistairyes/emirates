@@ -36,9 +36,22 @@ module "s3" {
 
 
 module "kms" {
-  source = "./modules/kms"
+  source = "terraform-aws-modules/kms/aws"
 
-  account_id = "your-account-id"
+  description = "S3 usage"
+  key_usage   = "ENCRYPT_DECRYPT"
+
+  # Policy
+  key_administrators                 = ["arn:aws:iam::012345678901:role/admin"]
+  key_service_roles_for_autoscaling  = ["arn:aws:iam::012345678901:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
+
+  # Aliases
+  aliases = ["mycompany/ebs"]
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
 }
 
 
