@@ -1,74 +1,55 @@
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "4.52.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.4.3"
-    }
-  }
-  required_version = ">= 1.1.0"
-}
-
 provider "aws" {
-  region = "us-west-2"
+  region = var.region
 }
 
-resource "random_pet" "sg" {}
-
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
+module "vpc" {
+  source = "./modules/vpc"
+  // pass in necessary variables here
 }
 
-resource "aws_instance" "web" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.web-sg.id]
-
-  user_data = <<-EOF
-              #!/bin/bash
-              apt-get update
-              apt-get install -y apache2
-              sed -i -e 's/80/8080/' /etc/apache2/ports.conf
-              echo "Hello World" > /var/www/html/index.html
-              systemctl restart apache2
-              EOF
+resource "aws_dx_connection" "example" {
+  name      = "tf-dx-connection"
+  bandwidth = "1Gbps"
+  location  = "EqDC2"
 }
 
-resource "aws_security_group" "web-sg" {
-  name = "${random_pet.sg.id}-sg"
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  // connectivity to ubuntu mirrors is required to run `apt-get update` and `apt-get install apache2`
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_subnet" "example" {
+  vpc_id     = aws_vpc.example.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-west-2-lax-1a"
 }
 
-output "web-address" {
-  value = "${aws_instance.web.public_dns}:8080"
+
+module "eks" {
+  source = "./modules/eks"
+  // pass in necessary variables here
+}
+
+module "s3" {
+  source = "./modules/s3"
+
+  artifact_store_bucket_name = "my-artifact-store-bucket"
+  source_bucket_name         = "my-source-bucket"
+  kms_key_id                 = module.kms.kms_key_arn
+}
+
+
+module "kms" {
+  source = "./modules/kms"
+
+  account_id = "your-account-id"
+}
+
+
+module "codepipeline" {
+  source = "./modules/codepipeline"
+
+  pipeline_name           = var.pipeline_name
+  pipeline_role_arn       = var.pipeline_role_arn
+  artifact_store_location = module.s3.artifact_store_bucket_name
+  source_bucket           = module.s3.source_bucket_name
+  source_object_key       = var.source_object_key
+  build_project_name      = var.build_project_name
+  app_name                = var.app_name
+  deployment_group_name   = var.deployment_group_name
 }
